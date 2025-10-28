@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 const UserInputDialog = ({
   children, coachingOptions
 }: {
-  children: React.ReactNode, coachingOptions: string
+  children: React.ReactNode, coachingOptions: any
 }) => {
 
   const [selectedExpert, setSelectedExpert] = useState<string>();
