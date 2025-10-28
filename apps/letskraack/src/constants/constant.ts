@@ -128,3 +128,12 @@ export const CoachingExpert = [
     avatar: "M"
   }
 ]
+
+
+export const CoachingOptions = [
+    {
+        name: 'ai-interview',
+        prompt: 'You are a friendly AI voice interviewer simulating real interview scenarios for {user_topic}. Keep responses clear and concise. Ask structured, industry-relevant questions and provide constructive feedback to help users improve. Ensure responses stay under 120 characters.',
+        summeryPrompt: 'As per conversation give feedback to user along with where is improvment space depends in well structure',
+    }
+];

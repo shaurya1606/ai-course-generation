@@ -1,5 +1,13 @@
 import { Dispatch, SetStateAction } from 'react';
 
+/*
+  Centralized types for the letskraack app.
+  - Grouped by folder / module so other modules can import specific shapes.
+  - Add new types here as the codebase grows. Keep this file as the single source of truth
+    for commonly-shared domain types (services, api, db, components).
+*/
+
+/* ---------------------------- Context / Common ---------------------------- */
 export type UserDetails = {
   id?: string;
   name?: string;
@@ -7,162 +15,178 @@ export type UserDetails = {
 };
 
 export type UserDetailsContextType = {
-    userDetail: UserDetails;
-    setUserDetail: Dispatch<SetStateAction<UserDetails>>;
+  userDetail: UserDetails;
+  setUserDetail: Dispatch<SetStateAction<UserDetails>>;
 };
 
 export type SelectedChapterIndexContextType = {
-    selectedChapterIndex: number;
-    setSelectedChapterIndex: Dispatch<SetStateAction<number>>;
+  selectedChapterIndex: number;
+  setSelectedChapterIndex: Dispatch<SetStateAction<number>>;
 };
 
-export type CourseContent = 
-  {
-  "kind": "youtube#searchListResponse",
-  "etag": "R4xTp5kBv9aaHepMyHjlHFYTF9c",
-  "nextPageToken": "CAQQAA",
-  "regionCode": "NL",
-  "pageInfo": {
-    "totalResults": 40508,
-    "resultsPerPage": 4
-  },
-  "items": [
-    {
-      "kind": "youtube#searchResult",
-      "etag": "keEMBtYrbLe6B_Liau7xIaFez70",
-      "id": {
-        "kind": "youtube#video",
-        "videoId": "LSEYdU8Dp9Y"
-      },
-      "snippet": {
-        "publishedAt": "2022-12-12T20:24:48Z",
-        "channelId": "UCHd1qamEkVSlTWkEqIqJbEQ",
-        "title": "What is Spring-Boot Framework? (explained from scratch)",
-        "description": "Hey everyone and welcome back! In this video we're going to learn what is Spring-Boot framework and how you can create a ...",
-        "thumbnails": {
-          "default": {
-            "url": "https://i.ytimg.com/vi/LSEYdU8Dp9Y/default.jpg",
-            "width": 120,
-            "height": 90
-          },
-          "medium": {
-            "url": "https://i.ytimg.com/vi/LSEYdU8Dp9Y/mqdefault.jpg",
-            "width": 320,
-            "height": 180
-          },
-          "high": {
-            "url": "https://i.ytimg.com/vi/LSEYdU8Dp9Y/hqdefault.jpg",
-            "width": 480,
-            "height": 360
-          }
-        },
-        "channelTitle": "Visual Computer Science",
-        "liveBroadcastContent": "none",
-        "publishTime": "2022-12-12T20:24:48Z"
-      }
-    },
-    {
-      "kind": "youtube#searchResult",
-      "etag": "hpJ_bET_JVJp8nUQx0VY7fzBlAQ",
-      "id": {
-        "kind": "youtube#video",
-        "videoId": "gJrjgg1KVL4"
-      },
-      "snippet": {
-        "publishedAt": "2025-02-26T12:30:48Z",
-        "channelId": "UCWv7vMbMWH4-V0ZXdmDpPBA",
-        "title": "Spring Boot Tutorial for Beginners [2025]",
-        "description": "Master Spring Boot and build amazing backends with Java! This beginner-friendly tutorial covers everything you need to learn ...",
-        "thumbnails": {
-          "default": {
-            "url": "https://i.ytimg.com/vi/gJrjgg1KVL4/default.jpg",
-            "width": 120,
-            "height": 90
-          },
-          "medium": {
-            "url": "https://i.ytimg.com/vi/gJrjgg1KVL4/mqdefault.jpg",
-            "width": 320,
-            "height": 180
-          },
-          "high": {
-            "url": "https://i.ytimg.com/vi/gJrjgg1KVL4/hqdefault.jpg",
-            "width": 480,
-            "height": 360
-          }
-        },
-        "channelTitle": "Programming with Mosh",
-        "liveBroadcastContent": "none",
-        "publishTime": "2025-02-26T12:30:48Z"
-      }
-    },
-    {
-      "kind": "youtube#searchResult",
-      "etag": "4gzT9MmNp3QGnrfzr94Q7INheUM",
-      "id": {
-        "kind": "youtube#video",
-        "videoId": "RRubcjpTkks"
-      },
-      "snippet": {
-        "publishedAt": "2019-04-18T15:57:44Z",
-        "channelId": "UC_fFL5jgoCOrwAVoM_fBYwA",
-        "title": "Learn Java in 14 Minutes (seriously)",
-        "description": "OFF ANY Springboard Tech Bootcamps with my code ALEXLEE. See if you qualify for the JOB GUARANTEE!",
-        "thumbnails": {
-          "default": {
-            "url": "https://i.ytimg.com/vi/RRubcjpTkks/default.jpg",
-            "width": 120,
-            "height": 90
-          },
-          "medium": {
-            "url": "https://i.ytimg.com/vi/RRubcjpTkks/mqdefault.jpg",
-            "width": 320,
-            "height": 180
-          },
-          "high": {
-            "url": "https://i.ytimg.com/vi/RRubcjpTkks/hqdefault.jpg",
-            "width": 480,
-            "height": 360
-          }
-        },
-        "channelTitle": "Alex Lee",
-        "liveBroadcastContent": "none",
-        "publishTime": "2019-04-18T15:57:44Z"
-      }
-    },
-    {
-      "kind": "youtube#searchResult",
-      "etag": "HPuJg9-kxVhaU-gZ2lWVN95oEh4",
-      "id": {
-        "kind": "youtube#video",
-        "videoId": "UoR6PtWEpxY"
-      },
-      "snippet": {
-        "publishedAt": "2024-06-24T13:51:24Z",
-        "channelId": "UC-ZZjHr4nl5t32pFl3Sqf0A",
-        "title": "Java spring boot roadmap | #springframework #springboot #job #placement #engineering",
-        "description": "",
-        "thumbnails": {
-          "default": {
-            "url": "https://i.ytimg.com/vi/UoR6PtWEpxY/default.jpg",
-            "width": 120,
-            "height": 90
-          },
-          "medium": {
-            "url": "https://i.ytimg.com/vi/UoR6PtWEpxY/mqdefault.jpg",
-            "width": 320,
-            "height": 180
-          },
-          "high": {
-            "url": "https://i.ytimg.com/vi/UoR6PtWEpxY/hqdefault.jpg",
-            "width": 480,
-            "height": 360
-          }
-        },
-        "channelTitle": "Genie Ashwani",
-        "liveBroadcastContent": "none",
-        "publishTime": "2024-06-24T13:51:24Z"
-      }
-    }
-  ]
-}
+/* ---------------------------- Services (services/) ---------------------------- */
+export type CoachingOption = {
+  name: string;
+  prompt: string;
+  summeryPrompt?: string;
+};
+
+export type AiModelRequest = {
+  topic: string;
+  coachingOption: string; // name of the CoachingOption
+  message: string;
+};
+
+export type AiCompletionMessage = {
+  role: 'system' | 'assistant' | 'user' | string;
+  content: string;
+};
+
+export type AiCompletionResponse = {
+  id?: string;
+  model?: string;
+  choices?: Array<{
+    message?: AiCompletionMessage;
+    // provider specific fields (candidates, content parts, inlineData etc.) are allowed
+    [k: string]: unknown;
+  }>;
+  text?: string;
+  // keep a flexible bag for provider-specific raw response
+  raw?: unknown;
+};
+
+/* ---------------------------- API (app/api/) ---------------------------- */
+export type YoutubeVideo = {
+  videoId?: string;
+  title?: string;
+  description?: string;
+  thumbnail?: string;
+};
+
+export type ChapterTopic = {
+  chapterName: string;
+  duration?: string;
+  topics?: string[];
+};
+
+export type GeneratedChapterContent = {
+  topic?: string;
+  content?: string; // HTML or structured content
+  // allow additional fields generated by the model
+  [k: string]: unknown;
+};
+
+export type CourseJson = {
+  course?: {
+    name?: string;
+    description?: string;
+    category?: string;
+    level?: string;
+    includeVideo?: boolean;
+    noOfChapters?: number;
+    bannerImagePrompt?: string;
+    chapters?: ChapterTopic[] | GeneratedChapterContent[];
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+};
+
+export type GenerateCourseContentRequest = {
+  courseJson: CourseJson;
+  courseId: string;
+  courseName?: string;
+};
+
+export type GenerateCourseContentResult = {
+  youtubeVideo?: YoutubeVideo[];
+  courseData?: GeneratedChapterContent | GeneratedChapterContent[];
+};
+
+export type GetYoutubeVideoParams = {
+  topic: string;
+};
+
+export type DiscussionRoomCreateRequest = {
+  roomId: string;
+  coachingOption: string;
+  topic: string;
+  expertName: string;
+};
+
+export type ConversationMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export type AiChatRequest = {
+  topic: string;
+  coachingOption: string;
+  lastFourMessage: ConversationMessage[];
+};
+
+export type AiChatResponse = ConversationMessage & {
+  finishReason?: string;
+};
+
+/* ---------------------------- DB / Schema (config/schema.ts) ---------------------------- */
+export type UserRow = {
+  id: number;
+  name: string;
+  email: string;
+  subscriptionId?: string;
+};
+
+export type CourseRow = {
+  id: number;
+  cid: string; // uuid/string course id
+  title: string;
+  description: string;
+  duration: string;
+  noOfChapters: number;
+  includeVideo: boolean;
+  difficultyLevel: string;
+  category?: string;
+  courseJson?: CourseJson;
+  bannerImageUrl?: string;
+  courseContent?: GeneratedChapterContent[] | unknown;
+  userEmail: string;
+};
+
+export type EnrollCourseRow = {
+  id: number;
+  cid: string;
+  userEmail: string;
+  completedChapters?: string[] | unknown;
+};
+
+export type DiscussionRoomRow = {
+  id: number;
+  roomId: string;
+  coachingOption: string;
+  topic: string;
+  expertName: string;
+  conversation?: unknown; // conversation JSON stored in DB
+};
+
+/* ---------------------------- UI Components (components/) ---------------------------- */
+export type LogoProps = {
+  size?: number | string;
+  className?: string;
+};
+
+export type ButtonProps = {
+  children?: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary' | 'ghost' | string;
+};
+
+/* ---------------------------- Helpers / generic ---------------------------- */
+export type KeyValue = Record<string, unknown>;
+
+/* NOTE:
+   - Add more module-specific types here as you discover `any` in a file.
+   - Prefer importing these types directly from their sections, e.g.:
+       import { CourseRow, GenerateCourseContentRequest } from '@/types/types'
+*/
 
