@@ -5,7 +5,7 @@ const isPublicRoute = createRouteMatcher([
     '/sign-up(.*)'
   // allow unauthenticated access to this API endpoint (for sign-in/signup flows or public usage)
   , '/api/user(.*)',
-  '/api/(.*)'
+  '/api/ai-chat(.*)'
 ])
 
 export default clerkMiddleware(async (auth, req) => {
