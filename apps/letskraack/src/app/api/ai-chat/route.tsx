@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { aiModelServices } from '@/services/aiModelServices';
-import type { AiChatRequest, AiChatResponse, ConversationMessage } from '@/types/types';
+import type { AiChatRequest,ConversationMessage } from '@/types/types';
 
 export async function POST(request: Request) {
     const startTime = Date.now();
@@ -26,10 +26,9 @@ export async function POST(request: Request) {
         const aiResponse = await aiModelServices(topic, coachingOption, lastFourMessage);
 
         // Extract the response data
-        const responseData: AiChatResponse = {
-            role: aiResponse?.message?.role || 'assistant',
+        const responseData = {
+            role: 'assistant',
             content: aiResponse?.message?.content || '',
-            finishReason: aiResponse?.finish_reason,
         };
 
         const duration = Date.now() - startTime;
