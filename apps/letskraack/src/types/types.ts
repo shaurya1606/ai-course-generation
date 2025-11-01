@@ -124,9 +124,6 @@ export type AiChatRequest = {
   lastFourMessage: ConversationMessage[];
 };
 
-export type AiChatResponse = ConversationMessage & {
-  finishReason?: string;
-};
 
 /* ---------------------------- DB / Schema (config/schema.ts) ---------------------------- */
 export type UserRow = {
@@ -245,6 +242,15 @@ export interface Feedback {
   };
 }
 
+export interface VoiceId {
+  voice: string;
+}
+// ------------------------------- Resume file interfaces ------------------------------- 
+
+export interface FileUploaderProps {
+  onFileSelect: (file: File | null) => void;
+  file: File | null;
+}
 /* NOTE:
    - Add more module-specific types here as you discover `any` in a file.
    - Prefer importing these types directly from their sections, e.g.:
