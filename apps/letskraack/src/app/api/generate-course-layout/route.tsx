@@ -6,9 +6,6 @@ import { NextResponse } from 'next/server';
 import { db } from '@/config/db';
 import { coursesTable } from '@/config/schema';
 import { currentUser } from '@clerk/nextjs/server';
-import mime from 'mime';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 
 
 export const ai = new GoogleGenAI({
@@ -65,10 +62,12 @@ export async function POST(request: Request) {
         // }
 
         // save to db
-        await saveCourseToDatabase(candidateJson, user?.primaryEmailAddress?.emailAddress || '', formData, candidateJson, courseId, user);
+        await saveCourseToDatabase(formData, candidateJson, courseId, user);
 
     return NextResponse.json({ courseId: courseId });
 };
+
+
 
 // const generateBannerImage = async (imagePrompt: string | undefined, courseId: string) => {
 //     if (!imagePrompt) return null;
@@ -109,7 +108,7 @@ export async function POST(request: Request) {
 //     return lastSavedFile;
 // };
 
-const saveCourseToDatabase = async (courseData: any, userEmail: string, formData: any, candidateJson: any, courseId: string, user: any) => {
+const saveCourseToDatabase = async (formData: any, candidateJson: any, courseId: string, user: any) => {
      const course = candidateJson?.course ?? {};
 
     // Map AI fields (with fallbacks to any provided formData)
