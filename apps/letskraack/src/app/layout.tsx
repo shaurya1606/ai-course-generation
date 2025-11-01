@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { 
+import { Inter } from "next/font/google";
+import {
   ClerkProvider,
   SignInButton,
   SignUpButton,
@@ -12,13 +12,8 @@ import "./globals.css";
 import Provider from "./provider";
 import { Toaster } from "@/components/ui/sonner"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -36,14 +31,15 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className="dark">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${inter.variable} font-sans antialiased`}
         >
+          <script src="https://js.puter.com/v2/"></script>
           <Provider>
             {children}
           </Provider>
           <Toaster />
         </body>
       </html>
-     </ClerkProvider>
+    </ClerkProvider>
   );
 }
