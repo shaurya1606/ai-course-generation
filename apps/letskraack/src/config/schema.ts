@@ -1,7 +1,8 @@
-import { boolean, integer, pgTable, varchar, json } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, varchar, json, text, timestamp } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  credits: integer().default(0),
   name: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   subscriptionId: varchar({ length: 255 }).notNull(),
@@ -36,5 +37,21 @@ export const discussionRoomTable = pgTable("discussionRoom", {
   coachingOption: varchar({ length: 255 }).notNull(),
   topic: varchar({ length: 255 }).notNull(),
   expertName: varchar({ length: 255 }).notNull(),
-  conversation: json()
+  conversation: json(),
+  feedback: text(),
+  userEmail: varchar("userEmail").references(() => usersTable.email).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  feedbackGeneratedAt: timestamp("feedback_generated_at", { withTimezone: true }),
+});
+
+export const resumeAnalysesTable = pgTable("resumeAnalyses", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  resumeId: varchar({ length: 255 }).notNull().unique(),
+  userEmail: varchar("userEmail").references(() => usersTable.email).notNull(),
+  companyName: varchar({ length: 255 }).notNull(),
+  jobTitle: varchar({ length: 255 }).notNull(),
+  jobDescription: text().notNull(),
+  feedback: text(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  feedbackGeneratedAt: timestamp("feedback_generated_at", { withTimezone: true }),
 });
