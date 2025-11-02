@@ -120,5 +120,59 @@
     @apply bg-background text-foreground;
     /* Prevent the layout from collapsing below 350px */
   }
+  
+  /* Global smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Smooth transitions for all elements */
+  * {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgb(23 23 23); /* neutral-900 */
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(64 64 64); /* neutral-700 */
+    border-radius: 4px;
+    transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(82 82 82); /* neutral-600 */
+  }
+
+  /* Firefox */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(64 64 64) rgb(23 23 23);
+  }
+
+  /* Enhanced smooth scrolling with momentum */
+  .scrollbar-thin {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Smooth scroll utility class */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 }
 
