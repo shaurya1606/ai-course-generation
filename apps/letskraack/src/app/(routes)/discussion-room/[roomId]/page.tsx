@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
 import { CoachingExpert } from '@/constants/constant'
-import { UserAvatar } from '@clerk/nextjs'
+import { UserAvatar, useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { StreamingTranscriber } from 'assemblyai'
 import { getToken } from '@/services/voiceToTextService'
@@ -14,6 +15,8 @@ import ConversationBox from '@/components/ai-interview/ConversationBox'
 import textToSpeechServices from '@/services/textToSpeechServices'
 import { VoiceId } from '@aws-sdk/client-polly'
 import { ConversationProvider, useConversation } from '@/context/ConversationContext'
+import { toast } from 'sonner'
+import { useUserDetails } from '@/hooks/use-user-details'
 
 type CoachingExpertType = {
     name: string
@@ -21,11 +24,15 @@ type CoachingExpertType = {
 }
 
 const DiscussionRoomInner = () => {
-    const { roomId } = useParams()
+    const params = useParams()
+    const router = useRouter()
+    const roomId = Array.isArray(params?.roomId) ? params.roomId[0] : params?.roomId
     const [expert, setExpert] = useState<CoachingExpertType | null>(null)
     const [discussionRoomData, setDiscussionRoomData] = useState<DiscussionRoomRow | null>(null)
     const [enableMic, setEnableMic] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [enableFeedback, setEnableFeedback] = useState(false)
+    const [interviewEndedReason, setInterviewEndedReason] = useState<'chat' | 'microphone' | null>(null)
     const conversationRef = useRef<ConversationMessage[]>([])
     const recorder = useRef<any>(null)
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -34,6 +41,8 @@ const DiscussionRoomInner = () => {
     const processedTurns = useRef<Set<number>>(new Set())
     const isInitialConversation = useRef(true)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+    const { userDetail, setUserDetail } = useUserDetails()
+    const interviewEndedRef = useRef(false)
     let RecordRTC: any = null
 
     const {
@@ -46,6 +55,98 @@ const DiscussionRoomInner = () => {
         isAiSpeaking,
         setAiSpeaking,
     } = useConversation()
+
+    const isChatEndIntent = useCallback((rawMessage: string) => {
+        const normalized = rawMessage.trim().toLowerCase()
+        if (!normalized) {
+            return false
+        }
+
+        const endPhrases = [
+            'end interview',
+            'finish interview',
+            'end chat',
+            'end conversation',
+            'stop interview',
+            'quit interview',
+            'end this interview',
+            'wrap up the interview',
+        ]
+
+        return endPhrases.some((phrase) => normalized === phrase || normalized.includes(phrase))
+    }, [])
+
+    const endInterview = useCallback(
+        async (reason: 'chat' | 'microphone') => {
+            if (interviewEndedRef.current) {
+                console.log(`Interview already ended, ignoring ${reason} termination request`)
+                return
+            }
+
+            interviewEndedRef.current = true
+            setInterviewEndedReason(reason)
+
+            if (audioRef.current) {
+                try {
+                    audioRef.current.pause()
+                } catch (audioPauseError) {
+                    console.error('Error while pausing audio playback', audioPauseError)
+                }
+                if (audioRef.current.src) {
+                    URL.revokeObjectURL(audioRef.current.src)
+                }
+            }
+
+            if (streamingTranscriber.current) {
+                try {
+                    await streamingTranscriber.current.close()
+                } catch (streamingCloseError) {
+                    console.error('Error closing streaming transcriber', streamingCloseError)
+                }
+                streamingTranscriber.current = null
+            }
+            if (recorder.current) {
+                try {
+                    recorder.current.stopRecording()
+                } catch (stopRecordingError) {
+                    console.error('Error stopping recorder', stopRecordingError)
+                }
+                recorder.current = null
+            }
+
+            if (silenceTimeoutRef.current) {
+                clearTimeout(silenceTimeoutRef.current)
+                silenceTimeoutRef.current = null
+            }
+
+            turnTextRef.current = {}
+            processedTurns.current.clear()
+            clearLiveTranscript()
+            setEnableMic(false)
+            setAiSpeaking(false)
+            isInitialConversation.current = true
+
+            const resolvedRoomId = typeof roomId === 'string' ? roomId : undefined
+            if (!resolvedRoomId) {
+                console.warn('Unable to persist conversation: missing roomId')
+                return
+            }
+
+            try {
+                const response = await axios.patch('/api/discussion-room', {
+                    roomId: resolvedRoomId,
+                    conversation: conversationRef.current,
+                })
+                console.log(`Discussion room updated after ${reason} termination`, response.data)
+            } catch (error) {
+                console.error('Failed to update discussion room', error)
+            }
+            finally {
+                setEnableFeedback(true)
+            }
+        },
+        [roomId, clearLiveTranscript, setAiSpeaking],
+    )
 
     useEffect(() => {
         conversationRef.current = conversation
@@ -73,8 +174,10 @@ const DiscussionRoomInner = () => {
 
                 console.log(`AI Response received in ${(endTime - startTime).toFixed(0)}ms:`, aiResponse.data)
 
+                
                 if (aiResponse.data && aiResponse.data.content) {
                     addAssistantMessage(aiResponse.data.content)
+                    await updateUserToken(aiResponse.data.content) // update ai generate token
 
                     try {
                         const audioUrl = await textToSpeechServices(
@@ -120,6 +223,10 @@ const DiscussionRoomInner = () => {
             return
         }
 
+        if (interviewEndedRef.current) {
+            return
+        }
+
         if (isInitialConversation.current) {
             isInitialConversation.current = false
             return
@@ -133,8 +240,13 @@ const DiscussionRoomInner = () => {
 
     useEffect(() => {
         const getDiscussionRoomData = async () => {
+            const resolvedRoomId = typeof roomId === 'string' ? roomId : undefined
+            if (!resolvedRoomId) {
+                console.warn('No roomId provided; skipping discussion room fetch')
+                return
+            }
             try {
-                const response = await axios.get<DiscussionRoomRow>('/api/discussion-room?roomId=' + roomId)
+                const response = await axios.get<DiscussionRoomRow>(`/api/discussion-room?roomId=${resolvedRoomId}`)
 
                 if (response.data) {
                     const Expert = CoachingExpert.find((item) => item.name === response.data.expertName)
@@ -163,6 +275,10 @@ const DiscussionRoomInner = () => {
     }, [])
 
     const connectMicrophone = async () => {
+        if (interviewEndedRef.current) {
+            console.warn('Interview already ended; skipping microphone connection')
+            return
+        }
         setEnableMic(true)
         setLoading(true)
         const token = await getToken()
@@ -197,12 +313,17 @@ const DiscussionRoomInner = () => {
             }
             console.log('Turn:', turn.transcript)
 
+            if (interviewEndedRef.current) {
+                return
+            }
+
             if (turn.end_of_turn && turn.turn_is_formatted && !processedTurns.current.has(turn.turn_order)) {
                 processedTurns.current.add(turn.turn_order)
 
                 addUserMessage(turn.transcript)
                 conversationRef.current = [...conversationRef.current, { role: 'user', content: turn.transcript }]
                 clearLiveTranscript()
+                await updateUserToken(turn.transcript)    // update user generated token
             }
 
             turnTextRef.current[turn.turn_order] = turn.transcript
@@ -269,53 +390,93 @@ const DiscussionRoomInner = () => {
     }
 
     const disconnectMicrophone = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        setLoading(true)
         e.preventDefault()
         console.log('Closing streaming transcript connection')
-
-        if (audioRef.current) {
-            audioRef.current.pause()
-            if (audioRef.current.src) {
-                URL.revokeObjectURL(audioRef.current.src)
-            }
-            audioRef.current = null
+        setLoading(true)
+        try {
+            await endInterview('microphone')
+        } finally {
+            setLoading(false)
         }
-
-        if (streamingTranscriber.current) {
-            await streamingTranscriber.current.close()
-            streamingTranscriber.current = null
-        }
-        if (recorder.current) {
-            recorder.current.stopRecording()
-            recorder.current = null
-        }
-        if (silenceTimeoutRef.current) {
-            clearTimeout(silenceTimeoutRef.current)
-            silenceTimeoutRef.current = null
-        }
-        turnTextRef.current = {}
-        processedTurns.current.clear()
-        clearLiveTranscript()
-        setEnableMic(false)
-        setAiSpeaking(false)
-        setLoading(false)
     }
 
     const handleSendMessage = (message: string) => {
-        console.log('Sending text message:', message)
+        if (interviewEndedRef.current) {
+            console.warn('Interview already ended; ignoring outgoing chat message')
+            return
+        }
 
-        addUserMessage(message)
-        conversationRef.current = [...conversationRef.current, { role: 'user', content: message }]
-        clearLiveTranscript()
+        const trimmedMessage = message.trim()
+        if (!trimmedMessage) {
+            return
+        }
+
+        console.log('Sending text message:', trimmedMessage)
+
+    addUserMessage(trimmedMessage)
+    conversationRef.current = [...conversationRef.current, { role: 'user', content: trimmedMessage }]
+    clearLiveTranscript()
+    void updateUserToken(trimmedMessage)
+
+        if (isChatEndIntent(trimmedMessage)) {
+            void endInterview('chat')
+        }
     }
 
     const handleMessageChange = (message: string) => {
+        if (interviewEndedRef.current) {
+            return
+        }
         updateLiveTranscript(message)
+    }
+
+    const generateFeedback = async () => {
+        if (!discussionRoomData) {
+            console.warn('No discussion room data available; cannot generate feedback')
+            toast.error('Cannot generate feedback: missing discussion room data')
+            return
+        }
+
+        toast.success('Navigating to feedback page...')
+        router.push(`/discussion-room//feedback/${roomId}`);
+    }
+
+    const updateUserToken = async (text: string) => {
+        const normalized = text?.trim()
+        if (!normalized || !userDetail?.email) {
+            return
+        }
+
+        const tokenCount = normalized.split(/\s+/).length
+        if (!tokenCount) {
+            return
+        }
+
+        const currentCredits = typeof userDetail.credits === 'number' ? userDetail.credits : 0
+        const updatedCredits = currentCredits + tokenCount
+
+        try {
+            const response = await axios.patch('/api/user', {
+                userEmail: userDetail.email,
+                credits: updatedCredits,
+            })
+            const nextCredits = typeof response.data?.credits === 'number' ? response.data.credits : updatedCredits
+            setUserDetail((prev) => ({ ...prev, credits: nextCredits }))
+            console.log('User credits updated', nextCredits)
+        } catch (error) {
+            console.error('Failed to update user credits', error)
+        }
     }
 
     return (
         <div className='p-20'>
             <h2 className='text-lg font-bold'>{discussionRoomData?.coachingOption}</h2>
+
+            {interviewEndedReason && (
+                <div className='mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200'>
+                    Interview ended {interviewEndedReason === 'chat' ? 'through chat' : 'after microphone disconnect'}. You can review the transcript below.
+                </div>
+            )}
 
             <div className='mt-5 grid grid-cols-1 gap-10 lg:grid-cols-3'>
                 <div className='lg:col-span-2'>
@@ -335,7 +496,7 @@ const DiscussionRoomInner = () => {
                     </div>
                     <div className='mt-5 flex items-center justify-center'>
                         {!enableMic ? (
-                            <Button onClick={connectMicrophone} disabled={loading}>
+                            <Button onClick={connectMicrophone} disabled={loading || !!interviewEndedReason}>
                                 {loading ? <Loader2Icon className='animate-spin' /> : null} Connect
                             </Button>
                         ) : (
@@ -346,11 +507,16 @@ const DiscussionRoomInner = () => {
                     </div>
                 </div>
                 <div className='text-center lg:col-span-1'>
-                    <ConversationBox onSendMessage={handleSendMessage} onMessageChange={handleMessageChange} />
-                    <p className='mt-4 text-sm text-gray-400'>
+                    <ConversationBox
+                        onSendMessage={handleSendMessage}
+                        onMessageChange={handleMessageChange}
+                        disabled={!!interviewEndedReason}
+                    />
+
+                    {!enableFeedback ? <p className='mt-4 text-sm text-gray-400'>
                         At the end of your conversation we will generate feedback and key takeaways based on the interview call.
-                    </p>
-                </div>
+                    </p> : <Button className='mt-4 w-full' onClick={generateFeedback}>Generate Feedback</Button>}
+                </div>``
             </div>
             <div className='mt-10 rounded-xl border border-neutral-700/60 bg-neutral-900/60 p-6'>
                 <h3 className='text-left text-lg font-bold text-neutral-200'>Live Transcript</h3>
