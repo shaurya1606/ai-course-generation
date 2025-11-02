@@ -1,18 +1,22 @@
+'use client'
+
 import React from 'react'
 import History from '@/components/ai-interview/History'
 import { Button } from '@/components/ui/button'
+import UserInputDialog from '@/components/ai-interview/UserInputDialog'
+import { useUserEmail } from '@/hooks/use-user-email'
 
-import UserInputDialog from '../../../components/ai-interview/UserInputDialog'
-
-const coachingOptions = 'ai-interview';
+const coachingOptions = 'ai-interview'
 
 const AiMock = () => {
+  const userEmail = useUserEmail()
+
   return (
-    <div className='flex flex-col items-center w-full p-8 mt-4'>
+    <div className='mt-4 flex w-full flex-col items-center p-8'>
       <UserInputDialog coachingOptions={coachingOptions}>
-          <Button className='text-white font-semibold'>Start New Mock Interview</Button>
-       </UserInputDialog>
-        <History />
+        <Button className='font-semibold text-white'>Start New Mock Interview</Button>
+      </UserInputDialog>
+      <History userEmail={userEmail ?? undefined} />
     </div>
   )
 }
