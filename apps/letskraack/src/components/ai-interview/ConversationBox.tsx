@@ -7,9 +7,10 @@ import { useConversation } from '@/context/ConversationContext'
 interface ConversationBoxProps {
   onSendMessage?: (message: string) => void
   onMessageChange?: (message: string) => void
+  disabled?: boolean
 }
 
-const ConversationBox: React.FC<ConversationBoxProps> = ({ onSendMessage, onMessageChange }) => {
+const ConversationBox: React.FC<ConversationBoxProps> = ({ onSendMessage, onMessageChange, disabled }) => {
 
   const { conversation } = useConversation()
 
@@ -20,6 +21,12 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ onSendMessage, onMess
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
+
+  useEffect(() => {
+    if (disabled) {
+      setMessage('')
+    }
+  }, [disabled])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -84,14 +91,15 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ onSendMessage, onMess
 
       </div>
       <div className='mt-4 flex items-center justify-between gap-2'>
-        <Input 
-          type='text' 
-          placeholder='Type your message...' 
-          value={message} 
+        <Input
+          type='text'
+          placeholder={disabled ? 'Interview ended. Chat disabled.' : 'Type your message...'}
+          value={message}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
+          disabled={disabled}
         />
-        <Button onClick={onSend} disabled={!message.trim()}>
+        <Button onClick={onSend} disabled={disabled || !message.trim()}>
           <SendHorizonal />
         </Button>
       </div>
