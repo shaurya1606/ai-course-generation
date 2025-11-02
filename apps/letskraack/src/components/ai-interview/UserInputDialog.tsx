@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "../ui/textarea"
 import { CoachingExpert } from "../../constants/constant"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../ui/button"
 import axios from 'axios'
 import { useRouter } from "next/navigation"
 import { Loader2Icon } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid';
+import { useUser } from "@clerk/nextjs"
 
 const UserInputDialog = ({
   children, coachingOptions
@@ -27,7 +28,11 @@ const UserInputDialog = ({
   const [selectedExpert, setSelectedExpert] = useState<string>();
   const [topic, setTopic] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [openDialog,setOpenDialog] = useState<boolean>(false);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const { user } = useUser();
+
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+
 
 
   const route = useRouter()
@@ -36,17 +41,18 @@ const UserInputDialog = ({
     const roomId = uuidv4();
     setLoading(true)
     const response = await axios.post('/api/discussion-room', {
-      roomId : roomId,
+      roomId: roomId,
       coachingOption: coachingOptions,
       topic: topic,
-      expertName: selectedExpert
+      expertName: selectedExpert,
+      userEmail: userEmail,
     });
 
-    console.log("discusin room response data",response.data);
-    
+    console.log("discusin room response data", response.data);
+
     setLoading(false)
     setOpenDialog(false);
-    route.push('/discussion-room/'+roomId)
+    route.push('/discussion-room/' + roomId)
   }
 
   return (
@@ -66,7 +72,7 @@ const UserInputDialog = ({
             <Textarea
               className="mt-1"
               placeholder="e.g., Software Engineering, Data Science, Product Management..."
-              onChange={(e)=>setTopic(e.target.value)}
+              onChange={(e) => setTopic(e.target.value)}
             />
             <p className="mt-2 text-sm text-neutral-400">
               Try to be as specific as possible for better results.
@@ -76,16 +82,16 @@ const UserInputDialog = ({
             <p className="text-sm font-semibold text-neutral-300">Popular experts</p>
             <div className="">
               {CoachingExpert.map((expert: any, index: number) => (
-                <div key={`${index}`} className="inline-flex flex-col items-center gap-2 mr-6 mt-4" onClick={()=>setSelectedExpert(expert.name)}>
-                <span
-                  key={`${index}`}
-                  className={`rounded-full bg-neutral-800 text-neutral-300 w-15 h-15 flex items-center justify-center hover:scale-105 transition-all text-xl font-bold cursor-pointer ${selectedExpert === expert.name? 'border-2 border-blue-500': ''}`}
-                >
-                  {expert.avatar}
-                </span>
-                <span key={`${index}-name`}>{expert.name}</span>
+                <div key={`${index}`} className="inline-flex flex-col items-center gap-2 mr-6 mt-4" onClick={() => setSelectedExpert(expert.name)}>
+                  <span
+                    key={`${index}`}
+                    className={`rounded-full bg-neutral-800 text-neutral-300 w-15 h-15 flex items-center justify-center hover:scale-105 transition-all text-xl font-bold cursor-pointer ${selectedExpert === expert.name ? 'border-2 border-blue-500' : ''}`}
+                  >
+                    {expert.avatar}
+                  </span>
+                  <span key={`${index}-name`}>{expert.name}</span>
                 </div>
-                
+
               ))}
             </div>
           </div>
