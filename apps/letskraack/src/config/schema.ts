@@ -51,7 +51,7 @@ export const resumeAnalysesTable = pgTable("resumeAnalyses", {
   companyName: varchar({ length: 255 }).notNull(),
   jobTitle: varchar({ length: 255 }).notNull(),
   jobDescription: text().notNull(),
-  feedback: text(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  feedback: json(),
+  uploadedAt: timestamp("uploaded_at", { withTimezone: true }).defaultNow().notNull(),
   feedbackGeneratedAt: timestamp("feedback_generated_at", { withTimezone: true }),
 });

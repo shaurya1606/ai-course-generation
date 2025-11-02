@@ -257,6 +257,15 @@ export interface FileUploaderProps {
   onFileSelect: (file: File | null) => void;
   file: File | null;
 }
+
+ export type ResumeData = {
+        resumeId: string;
+        jobTitle: string;
+        jobDescription: string;
+        companyName: string;
+        feedback: any;
+        userEmail: string | null;
+      }
 /* NOTE:
    - Add more module-specific types here as you discover `any` in a file.
    - Prefer importing these types directly from their sections, e.g.:

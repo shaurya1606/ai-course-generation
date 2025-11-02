@@ -11,7 +11,6 @@ export async function GET(request: Request) {
 
     const userEmail = user?.primaryEmailAddress?.emailAddress;
 
-
     if (courseId) {
         const response = await db
             .select()

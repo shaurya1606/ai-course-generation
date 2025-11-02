@@ -19,13 +19,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useUserDetails } from '@/hooks/use-user-details'
+import { ResumeData } from '@/types/types'
 
 
 const Upload = () => {
 
   const { fs, isLoading, ai, kv, puterReady, init } = usePuterStore();
   const route = useRouter();
-
+  const { userDetail } = useUserDetails();
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState("Processing your resume, please wait...");
   const [file, setFile] = useState<File | null>(null);
@@ -37,10 +39,10 @@ const Upload = () => {
   }, [init]);
 
 
-  const handleAnalyse = async ({ companyName, jobTitle, jobDescription, file }: { companyName: string; jobTitle: string; jobDescription: string, file: File }) => {
+  const handleAnalyse = async ({ companyName, jobTitle, jobDescription, file, uploadedAt }: { companyName: string; jobTitle: string; jobDescription: string, file: File, uploadedAt: Date }) => {
     try {
       setIsProcessing(true);
-      
+
       // Check if Puter is ready
       if (!window.puter) {
         setStatusText('Error: Puter.js is not loaded. Please refresh the page.');
@@ -88,14 +90,13 @@ const Upload = () => {
 
       const resumeId: string = uuidv4();
 
-      const resumeData = {
-        id: resumeId,
-        resumePath: uploadedResume.path,
-        imagePath: uploadedImage.path,
-        companyName,
+      const resumeData: ResumeData = {
+        resumeId,
         jobTitle,
         jobDescription,
-        feedback: ''
+        companyName,
+        feedback: '',
+        userEmail: userDetail?.email ?? null,
       }
 
       const jsonResumeData = JSON.stringify(resumeData);
@@ -108,6 +109,8 @@ const Upload = () => {
         uploadedResume.path,
         prepareInstructions({ jobTitle, jobDescription })
       )
+
+      const feedbackGeneratedAt = new Date();
 
       if (!feedback) {
         setStatusText('Error: Failed to analyse resume.');
@@ -137,9 +140,9 @@ const Upload = () => {
     setFile(file);
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!puterReady) {
       setStatusText('Error: System not ready. Please wait a moment and try again.');
       return;
@@ -154,6 +157,9 @@ const Upload = () => {
     const jobTitle = formData.get('job-title') as string;
     const description = formData.get('job-description') as string;
 
+    const uploadedAt = new Date();
+
+
     console.log({ companyName, jobTitle, description, file });
 
     if (!file) {
@@ -161,7 +167,7 @@ const Upload = () => {
       return;
     }
 
-    handleAnalyse({ companyName, jobTitle, jobDescription: description, file });
+    handleAnalyse({ companyName, jobTitle, jobDescription: description, file, uploadedAt });
   }
 
 
