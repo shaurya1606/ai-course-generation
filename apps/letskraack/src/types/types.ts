@@ -12,6 +12,8 @@ export type UserDetails = {
   id?: string;
   name?: string;
   email?: string;
+  credits?: number;
+  subscriptionId?: string;
 };
 
 export type UserDetailsContextType = {
@@ -163,6 +165,10 @@ export type DiscussionRoomRow = {
   topic: string;
   expertName: string;
   conversation?: unknown; // conversation JSON stored in DB
+  feedback?: string;
+  userEmail?: string;
+  createdAt?: string | Date;
+  feedbackGeneratedAt?: string | Date | null;
 };
 
 /* ---------------------------- UI Components (components/) ---------------------------- */
