@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type PropsWithChildren,
@@ -20,6 +21,10 @@ export type ConversationContextState = {
   setAiSpeaking: (isSpeaking: boolean) => void
 }
 
+type ConversationProviderProps = PropsWithChildren<{
+  initialConversation?: ConversationMessage[] | null
+}>
+
 const ConversationContext = createContext<ConversationContextState | undefined>(undefined)
 
 const initialSystemMessages: ConversationMessage[] = [
@@ -30,10 +35,18 @@ const initialSystemMessages: ConversationMessage[] = [
   },
 ]
 
-export const ConversationProvider = ({ children }: PropsWithChildren) => {
-  const [conversation, setConversation] = useState<ConversationMessage[]>(initialSystemMessages)
+export const ConversationProvider = ({ children, initialConversation }: ConversationProviderProps) => {
+  const [conversation, setConversation] = useState<ConversationMessage[]>(
+    initialConversation ?? initialSystemMessages,
+  )
   const [liveTranscript, updateLiveTranscript] = useState('')
   const [isAiSpeaking, setIsAiSpeaking] = useState(false)
+
+  useEffect(() => {
+    if (initialConversation !== undefined) {
+      setConversation(initialConversation ?? [])
+    }
+  }, [initialConversation])
 
   const addUserMessage = useCallback((content: string) => {
     setConversation((prev) => [...prev, { role: 'user', content }])
