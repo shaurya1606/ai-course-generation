@@ -97,6 +97,8 @@ const Upload = () => {
         companyName,
         feedback: '',
         userEmail: userDetail?.email ?? null,
+        uploadedUrl: uploadedResume.path,
+        imageUrl: uploadedImage.path,
       }
 
       const jsonResumeData = JSON.stringify(resumeData);

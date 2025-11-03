@@ -265,6 +265,8 @@ export interface FileUploaderProps {
         companyName: string;
         feedback: any;
         userEmail: string | null;
+        uploadedUrl: string;
+        imageUrl: string;
       }
 /* NOTE:
    - Add more module-specific types here as you discover `any` in a file.
