@@ -18,8 +18,8 @@ type ResumeData = {
   jobTitle?: string;
   companyName?: string;
   jobDescription?: string;
-  resumePath: string;
-  imagePath: string;
+  uploadedUrl?: string;
+  imageUrl?: string;
   feedback: Feedback;
 };
 
@@ -53,34 +53,46 @@ const FeedbackPage = () => {
 
       console.log('Company data:', resumeData.companyName);
 
-      const resumeBlob = await fs.read(resumeData.resumePath);
-      if (!resumeBlob) {
-        console.error('Resume blob not found');
-        setIsError(true);
-        setIsLoading(false);
-        return
-      }
-      console.log('Resume blob:', resumeBlob);
-
-      const pdfBlob = new Blob([resumeBlob], { type: 'application/pdf' });
-      const pdfResumeUrl = URL.createObjectURL(pdfBlob);
-      setResumeUrl(pdfResumeUrl);
-      console.log('PDF Resume URL:', pdfResumeUrl);
-
-      const imageBlob = await fs.read(resumeData.imagePath);
-      if (!imageBlob) {
-        console.error('Image blob not found');
-        setIsError(true);
-        setIsLoading(false);
-        return
-      }
-      console.log('Image blob:', imageBlob);
-
-      const imageResumeUrl = URL.createObjectURL(imageBlob);
-      setImageUrl(imageResumeUrl);
-      console.log('Image Resume URL:', imageResumeUrl);
-
+      // Set feedback first so it displays even if file reads fail
       setFeedback(resumeData.feedback);
+
+      // Try to read resume file (PDF)
+      try {
+        const pdfPath = resumeData.uploadedUrl;
+        if (pdfPath) {
+          console.log('Reading PDF from:', pdfPath);
+          const resumeBlob = await fs.read(pdfPath);
+          if (resumeBlob) {
+            console.log('Resume blob loaded successfully');
+            const pdfBlob = new Blob([resumeBlob], { type: 'application/pdf' });
+            const pdfResumeUrl = URL.createObjectURL(pdfBlob);
+            setResumeUrl(pdfResumeUrl);
+            console.log('PDF Resume URL created:', pdfResumeUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error reading resume file:', error);
+        // Continue execution - feedback will still show
+      }
+
+      // Try to read image file (PNG/JPG)
+      try {
+        const imgPath = resumeData.imageUrl;
+        if (imgPath) {
+          console.log('Reading image from:', imgPath);
+          const imageBlob = await fs.read(imgPath);
+          if (imageBlob) {
+            console.log('Image blob loaded successfully');
+            const imageResumeUrl = URL.createObjectURL(imageBlob);
+            setImageUrl(imageResumeUrl);
+            console.log('Image Resume URL created:', imageResumeUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error reading image file:', error);
+        // Continue execution - feedback will still show
+      }
+
       const jobTitle = resumeData?.jobTitle
       const companyName = resumeData?.companyName
       const jobDescription = resumeData?.jobDescription
