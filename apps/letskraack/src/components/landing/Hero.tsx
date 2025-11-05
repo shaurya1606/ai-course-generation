@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 
 const navItems = [
+    { label: "Demo", href: "#demo" },
     { label: "Features", href: "#features" },
     { label: "How it works", href: "#workflow" },
     { label: "Tools", href: "#tools" },
@@ -113,7 +114,7 @@ export function HeroSection() {
                 <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808] shadow-[0_20px_160px_rgba(0,0,0,0.65)]">
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-transparent to-transparent transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="flex flex-col items-center justify-center gap-4 px-6 pb-12 pt-12 md:px-16 md:pb-16 md:pt-16">
-                        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111]/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neutral-200">
+                        <div id="demo" className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111]/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neutral-200">
                             Demo Video
                         </div>
                         <p className="max-w-3xl text-sm text-neutral-300 md:text-base">

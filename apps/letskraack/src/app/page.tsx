@@ -1,11 +1,11 @@
-import { HeroSection } from "@/components/landing/sections/Hero";
-import { FeaturesSection } from "@/components/landing/sections/Features";
-import { HowItWorksSection } from "@/components/landing/sections/HowItWorks";
-import { ToolShowcaseSection } from "@/components/landing/sections/ToolShowcase";
-import { TestimonialsSection } from "@/components/landing/sections/Testimonials";
-import { FAQSection } from "@/components/landing/sections/FAQ";
-import { FinalCTASection } from "@/components/landing/sections/FinalCTA";
-import { FooterSection } from "@/components/landing/sections/Footer";
+import { HeroSection } from "@/components/landing/Hero";
+import { FeaturesSection } from "@/components/landing/Features";
+import { HowItWorksSection } from "@/components/landing/HowItWorks";
+import { ToolShowcaseSection } from "@/components/landing/ToolShowcase";
+import { TestimonialsSection } from "@/components/landing/Testimonials";
+import { FAQSection } from "@/components/landing/FAQ";
+import { FinalCTASection } from "@/components/landing/FinalCTA";
+import { FooterSection } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
