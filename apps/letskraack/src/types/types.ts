@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 
+
 /*
   Centralized types for the letskraack app.
   - Grouped by folder / module so other modules can import specific shapes.
@@ -268,6 +269,66 @@ export interface FileUploaderProps {
         uploadedUrl: string;
         imageUrl: string;
       }
+
+
+/* ---------------------------- Coding Coach ---------------------------- */
+export type ApiError = string | null;
+
+export type DifficultyLevel = 'easy' | 'medium' | 'hard';
+
+export type CodingLanguage = 'javascript' | 'python' | 'cpp' | 'java';
+
+export type CodingLanguageConfig = {
+  label: string;
+  promptLabel: string;
+  starterTemplate: string;
+  fallbackEditorial: string;
+  fallbackExplanation: string;
+};
+
+export type CodingLanguageOption = {
+  value: CodingLanguage;
+  label: string;
+};
+
+export interface AiInterviewQuestion {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: DifficultyLevel;
+  constraints: string;
+  note?: string;
+  starterCode: string;
+  followUpQuestions?: string[];
+  sampleAnswerOutline?: string;
+  editorialCode?: string;
+  editorialExplanation?: string;
+  language: CodingLanguage;
+}
+
+export type GenerateResponse = {
+  question: AiInterviewQuestion;
+  error?: string;
+};
+
+export type CheckResponse = {
+  feedback: string;
+  verdict?: string;
+  passed?: boolean;
+  error?: string;
+};
+
+export type GenerateQuestionPayload = {
+  difficulty?: DifficultyLevel;
+  topic?: string;
+  language?: CodingLanguage;
+};
+
+export type CheckSolutionPayload = {
+  code?: string;
+  question?: AiInterviewQuestion;
+};
+
 /* NOTE:
    - Add more module-specific types here as you discover `any` in a file.
    - Prefer importing these types directly from their sections, e.g.:
