@@ -7,7 +7,7 @@ const CourseListSkeleton = () => {
             {/* Header */}
             <Skeleton className="h-8 w-48 mb-4" />
             
-            {/* Course Cards Grid */}
+            {/* Course Cards Grid */} 
             <div className="rounded-lg border border-gray-300 p-6 bg-neutral-900 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div key={i} className="border border-gray-700 rounded-lg overflow-hidden bg-gradient-to-br from-neutral-900 to-black flex flex-col h-[450px]">
