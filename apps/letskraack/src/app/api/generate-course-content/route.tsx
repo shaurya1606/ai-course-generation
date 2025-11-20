@@ -6,6 +6,66 @@ import { db } from "@/config/db";
 import { coursesTable } from "@/config/schema";
 import { eq } from "drizzle-orm";
 
+// Helper function to safely parse JSON with multiple fallback methods
+function safeJsonParse(jsonString: string): any {
+    // Method 1: Direct parse
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.warn('Direct JSON parse failed, trying cleanup methods...');
+    }
+
+    // Method 2: Clean common escape issues
+    try {
+        // Fix common escape issues
+        let cleaned = jsonString
+            .replace(/\\n/g, '\\n')  // Normalize newlines
+            .replace(/\\'/g, "'")    // Fix single quotes
+            .replace(/\\"/g, '"')    // Fix double quotes
+            .replace(/\\&/g, '&')    // Fix ampersands
+            .replace(/\\\\/g, '\\')  // Fix double backslashes
+            .replace(/\n/g, '\\n')   // Escape actual newlines
+            .replace(/\r/g, '\\r')   // Escape carriage returns
+            .replace(/\t/g, '\\t');  // Escape tabs
+
+        return JSON.parse(cleaned);
+    } catch (error) {
+        console.warn('Cleanup method 1 failed, trying regex extraction...');
+    }
+
+    // Method 3: Extract JSON from markdown code blocks or text
+    try {
+        // Look for JSON-like content between curly braces
+        const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const extractedJson = jsonMatch[0];
+            // Try to fix common issues in the extracted content
+            const fixedJson = extractedJson
+                .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')  // Fix unquoted keys
+                .replace(/:\s*'([^']*)'/g, ':"$1"')  // Fix single quoted values
+                .replace(/,\s*}/g, '}')  // Remove trailing commas
+                .replace(/,\s*]/g, ']'); // Remove trailing commas in arrays
+
+            return JSON.parse(fixedJson);
+        }
+    } catch (error) {
+        console.warn('Regex extraction failed, trying final fallback...');
+    }
+
+    // Method 4: Last resort - try to parse with eval (dangerous but sometimes necessary)
+    try {
+        // Only use this as absolute last resort and log it
+        console.error('⚠️ Using eval as last resort for JSON parsing - this should be monitored');
+        // eslint-disable-next-line no-eval
+        const result = eval(`(${jsonString})`);
+        console.log('Eval parsing succeeded');
+        return result;
+    } catch (error) {
+        console.error('All JSON parsing methods failed');
+        throw new Error(`Failed to parse JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
 export async function POST(request: Request) {
     const { courseJson, courseId, courseName } = await request.json();
 
@@ -46,8 +106,24 @@ export async function POST(request: Request) {
         const candidateText =
             response?.candidates?.[0]?.content?.parts?.[0]?.text ?? response?.text ?? '';
 
+        if (!candidateText || candidateText.trim() === '') {
+            throw new Error('AI returned empty response');
+        }
+
+        console.log('Raw AI Response:', candidateText);
+
         const candidateRawJson = candidateText.replace('```json', '').replace('```', '');
-        const candidateJson = JSON.parse(candidateRawJson);
+        console.log('Cleaned JSON string:', candidateRawJson);
+
+        let candidateJson;
+        try {
+            candidateJson = safeJsonParse(candidateRawJson);
+        } catch (parseError) {
+            console.error('Failed to parse AI response as JSON:', parseError);
+            console.error('Raw response that failed:', candidateText);
+            throw new Error(`AI response parsing failed: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
+        }
+
         console.log('AI Generated Chapter Content:', candidateJson);
 
         // get youtube video

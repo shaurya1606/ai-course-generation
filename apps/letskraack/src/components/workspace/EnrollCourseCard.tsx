@@ -18,7 +18,7 @@ const EnrollCourseCard = ({ course, enrollCourses }: { course: any, enrollCourse
     const route = useRouter()
 
     const calculatePercentageProgress = () => {
-        return (completedChapters.length / courseJson.noOfChapters) * 100 || 0;
+        return Math.round((completedChapters.length / courseJson.noOfChapters) * 100 * 100) / 100 || 0;
     }
 
     const viewCourse = () => {

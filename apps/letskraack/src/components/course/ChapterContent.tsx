@@ -22,7 +22,7 @@ const ChapterContent = ({ courseInfo, refreshData }: { courseInfo: any, refreshD
 
     const currentChapter = courseContent?.[selectedChapterIndex];
     const videoData = currentChapter?.youtubeVideo;
-    const topics = currentChapter?.courseData?.topics;
+    const topics = currentChapter?.courseData?.topics || currentChapter?.courseData?.topicsContent;
     const chapterName = currentChapter?.courseData?.chapterName;
     const chapterDuration = currentChapter?.courseData?.duration;
 

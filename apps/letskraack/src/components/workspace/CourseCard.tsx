@@ -6,6 +6,7 @@ import { Settings, BookOpen, Clock, Zap, Loader2Icon, BookOpenText, Route } from
 import axios from 'axios'
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation'
+import { mutate } from 'swr'
 
 
 const CourseCard = ({ course  }: { course: any }) => {
@@ -14,24 +15,40 @@ const CourseCard = ({ course  }: { course: any }) => {
     const router = useRouter();
 
     const onEnrollCourse = async () => {
-        // enrol course logic here
-        try {
-        setLoading(true);
-        const response = await axios.post('/api/enroll-course', { courseId: course?.cid });
-        console.log('Enroll Course Response:', response.data);
-        if(response.data.enrollment) {
-            toast.warning("You are already enrolled in this course.");
-            setLoading(false);
-            return;
-        }
-        toast.success("Successfully enrolled in the course.");
-        setLoading(false);
-        } catch (error) {
-            console.error('Error enrolling course:', error);
-            setLoading(false);
-            toast.error("Error enrolling course. Please try again.");
-        }
+  try {
+    setLoading(true);
+
+    const response = await axios.post('/api/enroll-course', {
+      courseId: course?.cid,
+    });
+
+    const { message, enrollment } = response.data;
+
+    if (message === "Already enrolled") {
+      toast.warning("You are already enrolled in this course.");
+      return;
     }
+
+    if (message === "Enrolled successfully") {
+      toast.success("Successfully enrolled in the course.");
+      // Trigger SWR revalidation to refresh enrolled courses list
+      mutate('/api/enroll-course');
+      return;
+    }
+    console.log("Enroll Course Response:", enrollment);
+
+    // Any unexpected state
+    toast.error("Unexpected response from server.");
+  } 
+  catch (error) {
+    console.error("Error enrolling course:", error);
+    toast.error("Error enrolling course. Please try again.");
+  }
+  finally {
+    setLoading(false);
+  }
+};
+
 
     const navigateToGenerateCourseContent = () => {
         setLoading(true);

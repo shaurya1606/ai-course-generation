@@ -18,6 +18,7 @@ const Provider = ({children} : {children: React.ReactNode}) => {
     useEffect(() => {
         const checkUserInDatabase = async () => {
             try {
+                console.log('Checking if user exists in database:', user?.primaryEmailAddress?.emailAddress);
                 const response = await axios.get('/api/user', {
                     params: { email: user?.primaryEmailAddress?.emailAddress }
                 });
