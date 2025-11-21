@@ -6,7 +6,7 @@ import { PlayCircle, BookOpen, Clock, Zap, Loader2Icon } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
 import { useRouter } from 'next/navigation'
 
-const EnrollCourseCard = ({ course, enrollCourses }: { course: any, enrollCourses: any }) => {
+const EnrollCourseCard = ({ course, enrollCourses, customRoute }: { course: any, enrollCourses: any, customRoute?: string }) => {
     const courseJson = course.courseJson.course;
     const [loading, setLoading] = useState(false);
 
@@ -15,7 +15,7 @@ const EnrollCourseCard = ({ course, enrollCourses }: { course: any, enrollCourse
     // console.log('EnrollCourseCard - completedChapters:', completedChapters);
     console.log('EnrollCourseCard - enrollCourses:', enrollCourses);
 
-    const route = useRouter()
+    const router = useRouter()
 
     const calculatePercentageProgress = () => {
         return Math.round((completedChapters.length / courseJson.noOfChapters) * 100 * 100) / 100 || 0;
@@ -23,7 +23,7 @@ const EnrollCourseCard = ({ course, enrollCourses }: { course: any, enrollCourse
 
     const viewCourse = () => {
         setLoading(true);
-        route.push(`/workspace/view-course/${course?.cid}`);
+        router.push(customRoute || `/workspace/view-course/${course?.cid}`);
     }
 
 
