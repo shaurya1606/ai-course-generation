@@ -5,7 +5,18 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+       "env": [
+        "CLERK_SECRET_KEY",
+        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_DATABASE_URL",
+        "GEMINI_API_KEY",
+        "YOUTUBE_API_KEY",
+        "FREEPIC_API_KEY",
+        "ASSEMBLYAI_API_KEY",
+        "OPENAI_API_KEY"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
