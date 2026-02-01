@@ -32,7 +32,8 @@ export default function ChapterListSidebar({ courseInfo }: { courseInfo: any }) 
 
 
     const calculatePercentageProgress = () => {
-        return (completedChapters.length / (courseContent?.length || 1)) * 100 || 0;
+        const totalChapters = Array.isArray(courseContent) ? courseContent.length : 0;
+        return totalChapters > 0 ? (completedChapters.length / totalChapters) * 100 : 0;
     }
 
     return (
@@ -51,7 +52,7 @@ export default function ChapterListSidebar({ courseInfo }: { courseInfo: any }) 
                                     className='flex-1 h-1.5 bg-neutral-800'
                                 />
                                 <span className='text-xs font-semibold text-neutral-300'>
-                                    {completedChapters.length}/{courseContent?.length || 0}
+                                    {completedChapters.length}/{Array.isArray(courseContent) ? courseContent.length : 0}
                                 </span>
                             </div>
                         </div>
@@ -74,7 +75,7 @@ export default function ChapterListSidebar({ courseInfo }: { courseInfo: any }) 
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <Accordion type="single" collapsible>
-                                {courseContent && courseContent.map((chapter: any, index: number) => {
+                                {Array.isArray(courseContent) && courseContent.map((chapter: any, index: number) => {
                                     const isChapterCompleted = completedChapters.includes(index);
                                     
                                     return (
@@ -117,7 +118,7 @@ export default function ChapterListSidebar({ courseInfo }: { courseInfo: any }) 
 
                                             <AccordionContent className='px-3 pb-3' asChild>
                                                 <div className={`ml-10 space-y-1 pt-2 border-l-2 pl-4 ${isChapterCompleted ? 'border-blue-400 ' : 'border-neutral-600'}`}>
-                                                    {chapter?.courseData?.topics && chapter?.courseData?.topics?.map((topicItem: any, topicIndex: number) => (
+                                                    {(chapter?.courseData?.topics || chapter?.courseData?.topicsContent) && (chapter?.courseData?.topics || chapter?.courseData?.topicsContent)?.map((topicItem: any, topicIndex: number) => (
                                                         <div
                                                             key={topicIndex}
                                                             className={`flex items-start gap-2 py-2 px-2 rounded-md transition-all ${isChapterCompleted ? '' : 'hover:bg-neutral-800/50 cursor-pointer group'}`}

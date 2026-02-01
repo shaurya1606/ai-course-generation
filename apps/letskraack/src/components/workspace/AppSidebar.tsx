@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useEffect, useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +22,11 @@ import { AddNewCourseDialog } from "./AddNewCourseDialog"
 export function AppSidebar() {
 
   const path = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   return (
     <Sidebar>
@@ -39,7 +45,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {SidebarItems.map((item, index) => {
-                const isActive = path === item.href || (item.href !== "/workspace" && path.startsWith(`${item.href}/`));
+                const isActive = isHydrated && (path === item.href || (item.href !== "/workspace" && path.startsWith(`${item.href}/`)));
 
                 return (
                   <SidebarMenuItem key={index}>
