@@ -13,7 +13,7 @@ const CourseInfoSkeleton = () => {
             <div className="flex flex-col gap-4 flex-1">
                 {/* Title */}
                 <Skeleton className="h-8 w-3/4" />
-                
+                 
                 {/* Description */}
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />

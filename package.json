@@ -1,5 +1,5 @@
 {
-  "name": "SAAS-Platform",
+  "name": "LetsKraack",
   "private": true,
   "scripts": {
     "build": "turbo run build",
